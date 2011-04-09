@@ -222,9 +222,11 @@ public class JumpDialog extends Dialog {
 	}
 	
 	private void initializeEnabledCharacters() {
-		enabledCharacters = new LinkedHashSet<Character>();
-		enabledCharacters.addAll(primaryCharacters);
-		enabledCharacters.addAll(secondaryCharacters);
+		if(enabledCharacters==null) {
+			enabledCharacters = new LinkedHashSet<Character>();
+			enabledCharacters.addAll(primaryCharacters);
+			enabledCharacters.addAll(secondaryCharacters);
+		}
 	}
 	
 	private void initializePrimaryCharacter() {
