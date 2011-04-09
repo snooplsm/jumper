@@ -1,6 +1,6 @@
 <div>
 <img src="http://i.imgur.com/OmQGY.png" alt="letters" width="30%"/>
-
+&nbsp;
 <img src="http://i.imgur.com/DtnAm.png" alt="numbers" width="30%"/>
 </div>
 BUILD:
