@@ -1,7 +1,8 @@
-<img src="http://i.imgur.com/OmQGY.png" alt="letters"/>
+<div>
+<img src="http://i.imgur.com/OmQGY.png" alt="letters" width="30%"/>
 
-<img src="http://i.imgur.com/DtnAm.png" alt="numbers"/>
-
+<img src="http://i.imgur.com/DtnAm.png" alt="numbers" width="30%"/>
+</div>
 BUILD:
 
 	mvn install source:jar
