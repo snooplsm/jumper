@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -33,6 +34,12 @@ public class JumpDialog extends Dialog {
 	
 	private Character primaryCharacter;
 	private Character secondaryCharacter;
+	
+	private ColorStateList colorStateList;
+	
+	public void setColorStateList(ColorStateList colorStateList) {
+		this.colorStateList = colorStateList;
+	}
 
 	public boolean isUseHapticFeedback() {
 		return useHapticFeedback;
@@ -172,7 +179,11 @@ public class JumpDialog extends Dialog {
 					LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT, 1));
 			if (enabledCharacters.contains(character) || isDaryCharacter(character)) {
 				textView.setOnClickListener(listener);
-				textView.setTextColor(Color.WHITE);
+				if(colorStateList!=null) {
+					textView.setTextColor(colorStateList);
+				} else {
+					textView.setTextColor(Color.WHITE);
+				}
 				textView.setHapticFeedbackEnabled(useHapticFeedback);
 			} else {
 
