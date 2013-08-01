@@ -3,111 +3,48 @@ package com.happytap.jumper;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.LinearLayout.LayoutParams;
 
-public class JumpDialog extends Dialog {
+public class JumpView extends LinearLayout {
 
-	private LinkedHashSet<Character> primaryCharacters;
-
-	private LinkedHashSet<Character> enabledCharacters;
-
-	private LinkedHashSet<Character> secondaryCharacters;
-
-	private LinkedHashSet<Character> currentCharacters;
-
-	private JumpListener listener;
-	
-	private boolean useHapticFeedback = true;
-	
-	private Character primaryCharacter;
-	private Character secondaryCharacter;
-	
-	private ColorStateList colorStateList;
-	
-	public void setColorStateList(ColorStateList colorStateList) {
-		this.colorStateList = colorStateList;
-	}
-
-	public boolean isUseHapticFeedback() {
-		return useHapticFeedback;
-	}
-
-	public void setUseHapticFeedback(boolean useHapticFeedback) {
-		this.useHapticFeedback = useHapticFeedback;
+	public JumpView(Context context) {
+		this(context, null);
 	}
 
 	
-	public LinkedHashSet<Character> getPrimaryCharacters() {
-		return primaryCharacters;
-	}
-
-	public void setPrimaryCharacters(LinkedHashSet<Character> primaryCharacters) {
-		this.primaryCharacters = primaryCharacters;
-	}
-
-	public LinkedHashSet<Character> getSecondaryCharacters() {
-		return secondaryCharacters;
-	}
-
-	public void setSecondaryCharacters(LinkedHashSet<Character> secondaryCharacters) {
-		this.secondaryCharacters = secondaryCharacters;
-	}
-
-	public JumpDialog(Context context, boolean cancelable,
-			OnCancelListener cancelListener, JumpListener listener) {
-		super(context, cancelable, cancelListener);
-		this.listener = listener;
-	}
-
-	public JumpDialog(Context context, int theme, JumpListener listener) {
-		super(context, theme);
-		this.listener = listener;
-	}
-
-	public JumpDialog(Context context, JumpListener listener) {
-		super(context);
-		this.listener = listener;
-	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		ColorDrawable colorDrawable = new ColorDrawable(0xA0000000);
-		getWindow().setBackgroundDrawable(colorDrawable);
-		setContentView(R.layout.jumper);
+	public JumpView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		initializeViews();
 	}
 	
-	@Override
-	public void onAttachedToWindow() {
+	private void initializeViews() {
 		if (currentCharacters == null || currentCharacters.isEmpty()) {
 			initializePrimaryCharacters();
 			initializeSecondaryCharacters();
 			initializeEnabledCharacters();
 			currentCharacters = primaryCharacters;
 		}
-		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.jumper_root);
+		setOrientation(LinearLayout.VERTICAL);
+		LinearLayout linearLayout = this;
 		linearLayout.removeAllViews();
 		LinearLayout row = null;
-		Display display = getWindow().getWindowManager().getDefaultDisplay();
+		float height = getMeasuredHeight();
+		float width = getMeasuredWidth();
 		int perRow;
-		if (display.getHeight() < display.getWidth()) {			
-				perRow = 7;
+		if (width <= height) {			
+				perRow = 4;
 		} else {
-			perRow = 4;
+			perRow = 7;
 		}
 		int currentCharactersSize = currentCharacters.size();
 		if(currentCharacters.equals(primaryCharacters)) {
@@ -124,7 +61,7 @@ public class JumpDialog extends Dialog {
 			perRow = currentCharactersSize / 2;
 		}
 		int rows = Math.round(currentCharactersSize / perRow);
-		int height = display.getHeight() / rows;
+		height = height / rows;
 		Iterator<Character> iterator = currentCharacters.iterator();
 		View.OnClickListener listener = new View.OnClickListener() {
 
@@ -133,25 +70,23 @@ public class JumpDialog extends Dialog {
 				Character character = ((TextView) v).getText().charAt(0);
 				if(character.equals(secondaryCharacter) && currentCharacters.equals(primaryCharacters)) {
 					currentCharacters = secondaryCharacters;
-					cancel();
-					show();
+					initializeViews();
 				} else
 				if(character.equals(primaryCharacter) && currentCharacters.equals(secondaryCharacters)) {
 					currentCharacters = primaryCharacters;
-					cancel();
-					show();
+					initializeViews();
 				} else {
-					JumpDialog.this.cancel();
-					if (JumpDialog.this.listener != null) {
-						JumpDialog.this.listener.onJump(character);
+//					JumpDialog.this.cancel();
+					if (jumpListener != null) {
+						jumpListener.onJump(character);
 					}
 				}
 			}
 		};
 		for (int i = 0; i < currentCharactersSize; i++) {
 			if (i % perRow == 0) {
-				LayoutParams lp = new LayoutParams(display.getWidth(), height,
-						1);
+				LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, 0);
+				lp.weight = 1;
 				row = new LinearLayout(getContext());
 				row.setLayoutParams(lp);
 				row.setBackgroundColor(Color.YELLOW);
@@ -175,7 +110,7 @@ public class JumpDialog extends Dialog {
 			
 			textView.setText(String.valueOf(character.toString()));		
 			textView.setLayoutParams(new LinearLayout.LayoutParams(
-					LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT, 1));
+					0, LayoutParams.FILL_PARENT,1));
 			if(colorStateList!=null) {					
 				textView.setTextColor(colorStateList);
 			} else {
@@ -195,16 +130,6 @@ public class JumpDialog extends Dialog {
 		}
 	}
 	
-	private boolean isDaryCharacter(Character c) {
-		if(currentCharacters.equals(primaryCharacters) && c.equals(secondaryCharacter)) {
-			return true;
-		}
-		if(currentCharacters.equals(secondaryCharacters) && c.equals(primaryCharacter)) {
-			return true;
-		}
-		return false;
-	}
-
 	private void initializePrimaryCharacters() {
 		if(primaryCharacters==null) {
 			int A = (int) 'A';
@@ -242,14 +167,6 @@ public class JumpDialog extends Dialog {
 		}
 	}
 	
-	public LinkedHashSet<Character> getEnabledCharacters() {
-		return enabledCharacters;
-	}
-
-	public void setEnabledCharacters(LinkedHashSet<Character> enabledCharacters) {
-		this.enabledCharacters = enabledCharacters;
-	}
-
 	private void initializePrimaryCharacter() {
 		if(primaryCharacter==null) {
 			primaryCharacter = 'A';
@@ -261,21 +178,67 @@ public class JumpDialog extends Dialog {
 			secondaryCharacter = '#';
 		}
 	}
-
-	public Character getPrimaryCharacter() {
-		return primaryCharacter;
+	
+	private boolean isDaryCharacter(Character c) {
+		if(currentCharacters.equals(primaryCharacters) && c.equals(secondaryCharacter)) {
+			return true;
+		}
+		if(currentCharacters.equals(secondaryCharacters) && c.equals(primaryCharacter)) {
+			return true;
+		}
+		return false;
 	}
 
-	public void setPrimaryCharacter(Character primaryCharacter) {
-		this.primaryCharacter = primaryCharacter;
+
+
+	private LinkedHashSet<Character> primaryCharacters;
+
+	private LinkedHashSet<Character> enabledCharacters;
+
+	private LinkedHashSet<Character> secondaryCharacters;
+
+	private LinkedHashSet<Character> currentCharacters;
+
+	private JumpListener jumpListener;
+	
+	private boolean useHapticFeedback = true;
+	
+	private Character primaryCharacter;
+	private Character secondaryCharacter;
+	
+	private ColorStateList colorStateList;
+	
+	public void setColorStateList(ColorStateList colorStateList) {
+		this.colorStateList = colorStateList;
 	}
 
-	public Character getSecondaryCharacter() {
-		return secondaryCharacter;
+	public boolean isUseHapticFeedback() {
+		return useHapticFeedback;
 	}
 
-	public void setSecondaryCharacter(Character secondaryCharacter) {
-		this.secondaryCharacter = secondaryCharacter;
+	public void setUseHapticFeedback(boolean useHapticFeedback) {
+		this.useHapticFeedback = useHapticFeedback;
 	}
 
+	
+	public LinkedHashSet<Character> getPrimaryCharacters() {
+		return primaryCharacters;
+	}
+
+	public void setPrimaryCharacters(LinkedHashSet<Character> primaryCharacters) {
+		this.primaryCharacters = primaryCharacters;
+	}
+
+	public LinkedHashSet<Character> getSecondaryCharacters() {
+		return secondaryCharacters;
+	}
+
+	public void setSecondaryCharacters(LinkedHashSet<Character> secondaryCharacters) {
+		this.secondaryCharacters = secondaryCharacters;
+	}
+
+	public void setJumpListener(JumpListener jumpListener) {
+		this.jumpListener = jumpListener;
+	}
+	
 }
