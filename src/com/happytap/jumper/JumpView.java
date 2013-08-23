@@ -8,7 +8,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -24,10 +23,9 @@ public class JumpView extends LinearLayout {
 	
 	public JumpView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		initializeViews();
 	}
 	
-	private void initializeViews() {
+	public void initializeViews() {
 		if (currentCharacters == null || currentCharacters.isEmpty()) {
 			initializePrimaryCharacters();
 			initializeSecondaryCharacters();
